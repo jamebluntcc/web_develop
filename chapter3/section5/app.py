@@ -3,7 +3,8 @@ import os
 
 from werkzeug import SharedDataMiddleware
 from flask import abort, Flask, request, jsonify, redirect, send_file
-
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
 from ext import db, mako, render_template
 from models import PasteFile
 from utils import get_file_path, humanize_bytes
@@ -20,6 +21,9 @@ app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
 
 mako.init_app(app)
 db.init_app(app)
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 
 @app.route('/r/<img_hash>')
@@ -127,4 +131,4 @@ def s(symlink):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    manager.run()
